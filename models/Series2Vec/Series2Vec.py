@@ -13,6 +13,9 @@ class Seires2Vec(nn.Module):
         num_heads = config['num_heads']
         dim_ff = config['dim_ff']
         rep_size = config['rep_size']
+        # change the given rep size to half such that the representations are given in rep_size
+        # note that the rep size is doubled in the pipeline, thats wy it is edited
+        rep_size = rep_size//2
         # Embedding Layer -----------------------------------------------------------
         # self.embed_layer = ConvEncoder(input_channels, [emb_size]*config['layers']+[rep_size], kernel_size=3)
         # self.embed_layer_f = ConvEncoder(input_channels, [emb_size] * config['layers'] + [rep_size], kernel_size=3)
@@ -34,8 +37,10 @@ class Seires2Vec(nn.Module):
 
         self.gap = nn.AdaptiveAvgPool1d(1)
         self.gap_f = nn.AdaptiveAvgPool1d(1)
+        # changed rep size ?
         self.C_out = nn.Linear(2*rep_size, num_classes)
-        # self.C_out = nn.Linear(rep_size, num_classes)
+        # og rep size
+        # self.C_out = nn.Linear(2*rep_size, num_classes)
 
     def linear_prob(self, x):
         out = self.embed_layer(x)

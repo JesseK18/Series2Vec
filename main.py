@@ -30,7 +30,7 @@ for problem in os.listdir(config['data_dir']):
     print("representations:")
     print("train set and label shape:", train_repr.shape, train_labels.shape)
     print("test set and label shape:", test_repr.shape, test_labels.shape)
-    print(train_repr[0])
+    #print(train_repr[0])
     #print(all_metrics)
     # print(best_aggr_metrics_test)
     # print_str = 'Best Model Test Summary: '

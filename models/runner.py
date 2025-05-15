@@ -39,7 +39,7 @@ def pre_training(config, Data):
     train_loader = DataLoader(dataset=train_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
     test_loader = DataLoader(dataset=test_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
 
-    # --------------------------------- Self Superviseed Training ------------------------------------------------------
+    # --------------------------------- Self Supervised Training ------------------------------------------------------
     SS_trainer = S2V_SS_Trainer(model, train_loader, test_loader, config, print_conf_mat=False)
     save_path = os.path.join(config['save_dir'], config['problem'] + '_model_{}.pth'.format('last'))
     SS_train_runner(config, model, SS_trainer, save_path)

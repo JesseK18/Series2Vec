@@ -3,22 +3,28 @@ python main.py \
   --problem Adiac \
   --Training_mode Pre_Training \
   --Model_Type Series2Vec \
-  --output_dir ./outputs \
+  --rep_size 320 \
+  --output_dir ./outputs/pretrain \
+  --val_ratio 0.2 \
+  --epochs 100 \
+  --batch_size 64 \
+  --lr 1e-3 \
+  --Norm True \
   --seed 18 \
-  --key_metric loss
+  --key_metric loss \
+  --gpu -1
 
-
-
-  python main.py --dataset UCR --output_dir Results --val_ratio 0.2 --Training_mode Pre_Training --Model_Type Series2Vec --epochs 100 --batch_size 64 --lr 1e-3 --Norm True
-
-
-
-
-  python main.py \
+python main.py \
   --dataset UCR \
   --problem Adiac \
   --Training_mode Pre_Training \
   --Model_Type Series2Vec \
-  --output_dir ./outputs \
+  --output_dir ./outputs/pretrain \
+  --val_ratio 0.2 \
+  --epochs 100 \
+  --batch_size 64 \
+  --lr 1e-3 \
+  --Norm True \
   --seed 18 \
-  --key_metric loss
+  --key_metric loss \
+  --gpu -1

@@ -116,17 +116,17 @@ class S2V_SS_Trainer(BaseTrainer):
         self.epoch_metrics['epoch'] = epoch_num
         self.epoch_metrics['loss'] = epoch_loss
 
-        if (epoch_num+1) % 5 == 0:
-            self.model.eval()
-            train_repr, train_labels = S2V_make_representation(self.model, self.train_loader)
-            test_repr, test_labels = S2V_make_representation(self.model, self.test_loader)
-            clf = fit_lr(train_repr.cpu().detach().numpy(), train_labels.cpu().detach().numpy())
-            y_hat = clf.predict(test_repr.cpu().detach().numpy())
-            acc_test = accuracy_score(test_labels.cpu().detach().numpy(), y_hat)
-            print('Test_acc:', acc_test)
-            result_file = open(self.save_path + '/' + self.problem + '_linear_result.txt', 'a+')
-            print('{0}, {1}, {2}'.format(epoch_num, acc_test, epoch_loss), file=result_file)
-            result_file.close()
+        # if (epoch_num+1) % 5 == 0:
+        #     self.model.eval()
+        #     train_repr, train_labels = S2V_make_representation(self.model, self.train_loader)
+        #     test_repr, test_labels = S2V_make_representation(self.model, self.test_loader)
+        #     clf = fit_lr(train_repr.cpu().detach().numpy(), train_labels.cpu().detach().numpy())
+        #     y_hat = clf.predict(test_repr.cpu().detach().numpy())
+        #     acc_test = accuracy_score(test_labels.cpu().detach().numpy(), y_hat)
+        #     print('Test_acc:', acc_test)
+        #     result_file = open(self.save_path + '/' + self.problem + '_linear_result.txt', 'a+')
+        #     print('{0}, {1}, {2}'.format(epoch_num, acc_test, epoch_loss), file=result_file)
+        #     result_file.close()
 
         return self.epoch_metrics
 
