@@ -25,6 +25,7 @@ def choose_trainer(model, train_loader, test_loader, config, conf_mat, type):
 
 def pre_training(config, Data):
     logger.info("Creating Distance based Self Supervised model ...")
+    #print(Data.keys())
     model = Model_factory(config, Data)
     optim_class = get_optimizer("RAdam")
     config['optimizer'] = optim_class(model.parameters(), lr=config['lr'], weight_decay=0)
@@ -49,47 +50,48 @@ def pre_training(config, Data):
     SS_Encoder.to(config['device'])
     train_repr, train_labels = S2V_make_representation(SS_Encoder, train_loader)
     test_repr, test_labels = S2V_make_representation(SS_Encoder, test_loader)
-    clf = fit_lr(train_repr.cpu().detach().numpy(), train_labels.cpu().detach().numpy())
-    y_hat = clf.predict(test_repr.cpu().detach().numpy())
-    LP_acc_test = accuracy_score(test_labels.cpu().detach().numpy(), y_hat)
-    print('Test_acc:', LP_acc_test)
-    cm = confusion_matrix(test_labels.cpu().detach().numpy(), y_hat)
-    print("Confusion Matrix:")
-    print(cm)
-    # --------------------------------- Load Data -------------------------------------------------------------
-    train_dataset = dataset_class(Data['train_data'], Data['train_label'], config)
-    val_dataset = dataset_class(Data['val_data'], Data['val_label'], config)
-    test_dataset = dataset_class(Data['test_data'], Data['test_label'], config)
+    return train_repr, train_labels, test_repr, test_labels
+    # clf = fit_lr(train_repr.cpu().detach().numpy(), train_labels.cpu().detach().numpy())
+    # y_hat = clf.predict(test_repr.cpu().detach().numpy())
+    # LP_acc_test = accuracy_score(test_labels.cpu().detach().numpy(), y_hat)
+    # print('Test_acc:', LP_acc_test)
+    # cm = confusion_matrix(test_labels.cpu().detach().numpy(), y_hat)
+    # print("Confusion Matrix:")
+    # print(cm)
+    # # --------------------------------- Load Data -------------------------------------------------------------
+    # train_dataset = dataset_class(Data['train_data'], Data['train_label'], config)
+    # val_dataset = dataset_class(Data['val_data'], Data['val_label'], config)
+    # test_dataset = dataset_class(Data['test_data'], Data['test_label'], config)
 
-    train_loader = DataLoader(dataset=train_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
-    val_loader = DataLoader(dataset=val_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
+    # train_loader = DataLoader(dataset=train_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
+    # val_loader = DataLoader(dataset=val_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
+    # test_loader = DataLoader(dataset=test_dataset, batch_size=config['batch_size'], shuffle=True, pin_memory=True)
 
-    logger.info('Starting Fine_Tuning...')
-    S_trainer = S2V_S_Trainer(SS_Encoder, train_loader, None, config, print_conf_mat=False)
-    S_val_evaluator = S2V_S_Trainer(SS_Encoder, val_loader, None, config, print_conf_mat=False)
+    # logger.info('Starting Fine_Tuning...')
+    # S_trainer = S2V_S_Trainer(SS_Encoder, train_loader, None, config, print_conf_mat=False)
+    # S_val_evaluator = S2V_S_Trainer(SS_Encoder, val_loader, None, config, print_conf_mat=False)
 
-    save_path = os.path.join(config['save_dir'], config['problem'] + '_2_model_{}.pth'.format('last'))
-    Strain_runner(config, SS_Encoder, S_trainer, S_val_evaluator, save_path)
+    # save_path = os.path.join(config['save_dir'], config['problem'] + '_2_model_{}.pth'.format('last'))
+    # Strain_runner(config, SS_Encoder, S_trainer, S_val_evaluator, save_path)
 
-    best_Encoder, optimizer, start_epoch = load_model(SS_Encoder, save_path, config['optimizer'])
-    best_Encoder.to(config['device'])
+    # best_Encoder, optimizer, start_epoch = load_model(SS_Encoder, save_path, config['optimizer'])
+    # best_Encoder.to(config['device'])
 
-    train_repr, train_labels = S2V_make_representation(best_Encoder, train_loader)
-    test_repr, test_labels = S2V_make_representation(best_Encoder, test_loader)
-    clf = fit_lr(train_repr.cpu().detach().numpy(), train_labels.cpu().detach().numpy())
-    y_hat = clf.predict(test_repr.cpu().detach().numpy())
-    acc_test = accuracy_score(test_labels.cpu().detach().numpy(), y_hat)
-    print('Test_acc:', acc_test)
-    cm = confusion_matrix(test_labels.cpu().detach().numpy(), y_hat)
-    print("Confusion Matrix:")
-    print(cm)
+    # train_repr, train_labels = S2V_make_representation(best_Encoder, train_loader)
+    # test_repr, test_labels = S2V_make_representation(best_Encoder, test_loader)
+    # clf = fit_lr(train_repr.cpu().detach().numpy(), train_labels.cpu().detach().numpy())
+    # y_hat = clf.predict(test_repr.cpu().detach().numpy())
+    # acc_test = accuracy_score(test_labels.cpu().detach().numpy(), y_hat)
+    # print('Test_acc:', acc_test)
+    # cm = confusion_matrix(test_labels.cpu().detach().numpy(), y_hat)
+    # print("Confusion Matrix:")
+    # print(cm)
 
-    best_test_evaluator = S2V_S_Trainer(best_Encoder, test_loader, None, config, print_conf_mat=True)
-    best_aggr_metrics_test, all_metrics = best_test_evaluator.evaluate(keep_all=True)
-    all_metrics['LGR_ACC'] = acc_test
-    all_metrics['LP_LGR_ACC'] = LP_acc_test
-    return best_aggr_metrics_test, all_metrics
+    # best_test_evaluator = S2V_S_Trainer(best_Encoder, test_loader, None, config, print_conf_mat=True)
+    # best_aggr_metrics_test, all_metrics = best_test_evaluator.evaluate(keep_all=True)
+    # all_metrics['LGR_ACC'] = acc_test
+    # all_metrics['LP_LGR_ACC'] = LP_acc_test
+    # return best_aggr_metrics_test, all_metrics
 
 '''
 def TS_TCC_pre_training(config, Data):

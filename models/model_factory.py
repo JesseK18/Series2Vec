@@ -14,7 +14,7 @@ def Model_factory(config, data):
     config['Data_shape'] = data['train_data'].shape
     config['num_labels'] = int(max(data['train_label'])) + 1
 
-    if config['Model_Type'][0] == 'Series2Vec':
+    if config['Model_Type'] == 'Series2Vec':
         model = Series2Vec.Seires2Vec(config, num_classes=config['num_labels'])
     '''
     if config['Model_Type'][0] == 'TS_TCC':
@@ -23,7 +23,7 @@ def Model_factory(config, data):
         model = TF_C.TF_C(config, num_classes=config['num_labels'])
     '''
 
-
-    logger.info("Model:\n{}".format(model))
+    # show model structure
+    #logger.info("Model:\n{}".format(model))
     logger.info("Total number of parameters: {}".format(count_parameters(model)))
     return model

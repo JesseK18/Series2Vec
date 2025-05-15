@@ -13,6 +13,7 @@ def data_loader(config):
     Data = numpy_loader(config)
     return Data
 
+#data loading after preprocessing
 
 def numpy_loader(config):
     # Build data

@@ -66,7 +66,9 @@ class S2V_SS_Trainer(BaseTrainer):
         self.analyzer = analysis.Analyzer(print_conf_mat=False)
         if kwargs['print_conf_mat']:
             self.analyzer = analysis.Analyzer(print_conf_mat=True)
-        self.sdtw = SoftDTW(use_cuda=True, gamma=0.1)
+        #self.sdtw = SoftDTW(use_cuda=True, gamma=0.1)
+        use_cuda = (self.device.type == 'cuda')
+        self.sdtw = SoftDTW(use_cuda=use_cuda, gamma=0.1)
 
     def train_epoch(self, epoch_num=None):
         self.model = self.model.train()
@@ -90,9 +92,11 @@ class S2V_SS_Trainer(BaseTrainer):
             Distance_out = Distance_normalizer(Distance_out)
             Distance_out_f = torch.masked_select(Distance_out_f, mask)
             Distance_out_f = Distance_normalizer(Distance_out_f)
+            # here
             Dtw_Distance = cuda_soft_DTW(self.sdtw, X, len(X))
             Dtw_Distance = Distance_normalizer(Dtw_Distance)
             X_f = filter_frequencies(X)
+            # here
             Euclidean_Distance_f = Euclidean_Dis(X_f, len(X_f))
             Euclidean_Distance_f = Distance_normalizer(Euclidean_Distance_f)
             temporal_loss = F.smooth_l1_loss(Distance_out, Dtw_Distance)
@@ -299,16 +303,18 @@ def SS_train_runner(config, model, trainer, path):
 def cuda_soft_DTW(sdtw, X, size):
     # index = list(product([*range(size)], repeat=2))
     index = generate_list(size-1)
-    combination1 = X[[i[0] for i in index]].to('cuda')
-    combination2 = X[[i[1] for i in index]].to('cuda')
+    # combination1 = X[[i[0] for i in index]].to('cuda')
+    # combination2 = X[[i[1] for i in index]].to('cuda')
+    combination1 = X[[i[0] for i in index]].to('cpu')
+    combination2 = X[[i[1] for i in index]].to('cpu')
     Dtw_Distance = sdtw(combination1, combination2)
     return Dtw_Distance
 
 
 def Euclidean_Dis(X, size):
     index = generate_list(size - 1)
-    combination1 = X[[i[0] for i in index]].to('cuda')
-    combination2 = X[[i[1] for i in index]].to('cuda')
+    combination1 = X[[i[0] for i in index]].to('cpu') # before cuda
+    combination2 = X[[i[1] for i in index]].to('cpu') # before cuda
     combination1_flat = combination1.view(combination1.size(0), -1)
     combination2_flat = combination2.view(combination2.size(0), -1)
     distances = torch.norm(combination1_flat - combination2_flat, dim=1)
@@ -343,7 +349,7 @@ def S2V_make_representation(model, data):
     with torch.no_grad():
         for i, batch in enumerate(data):
             X, targets, IDs = batch
-            rep = model.linear_prob(X.to('cuda'))
+            rep = model.linear_prob(X.to('cpu'))
             out.append(rep)
             labels.append(targets)
 

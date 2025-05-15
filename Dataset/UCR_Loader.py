@@ -28,17 +28,69 @@ def load_UCR_dataset(file_name, folder_path):
 
 
 def split_dataset(data, label, validation_ratio):
-    splitter = model_selection.StratifiedShuffleSplit(n_splits=1, test_size=validation_ratio, random_state=1234)
-    _, val_indices = zip(*splitter.split(X=np.zeros(len(label)), y=label))
+    # splitter = model_selection.StratifiedShuffleSplit(n_splits=1, test_size=validation_ratio, random_state=1234)
+    # _, val_indices = zip(*splitter.split(X=np.zeros(len(label)), y=label))
+    # val_data = data[val_indices]
+    # val_label = label[val_indices]
+    # return val_data, val_label
+    _, counts = np.unique(label, return_counts=True)
+    if np.any(counts < 2):
+        logger.warning("Some classes <2 samples; doing a RANDOM split for val set")
+        splitter = model_selection.ShuffleSplit(
+            n_splits=1,
+            test_size=validation_ratio,
+            random_state=1234
+        )
+        # ShuffleSplit.split yields (train_idx, val_idx)
+        _, val_indices = next(splitter.split(X=np.arange(len(label))))
+    else:
+        splitter = model_selection.StratifiedShuffleSplit(
+            n_splits=1,
+            test_size=validation_ratio,
+            random_state=1234
+        )
+        _, val_indices = next(splitter.split(X=np.zeros(len(label)), y=label))
+
     val_data = data[val_indices]
     val_label = label[val_indices]
     return val_data, val_label
 
 
 for problem in os.listdir('UCR'):
+    if problem.startswith('.') or not os.path.isdir(os.path.join('UCR', problem)):
+        continue
+    problem_dir = os.path.join('UCR', problem)
+    train_path = os.path.join(problem_dir, f"{problem}_TRAIN.tsv")
+    test_path  = os.path.join(problem_dir, f"{problem}_TEST.tsv")
+
+    # ← skip hidden entries, non‐dirs or missing TRAIN/TEST
+    if problem.startswith('.') \
+       or not os.path.isdir(problem_dir) \
+       or not os.path.isfile(train_path) \
+       or not os.path.isfile(test_path):
+        continue
     print(problem)
     Data = {}
     X_train, y_train, X_test, y_test = load_UCR_dataset(file_name=problem, folder_path=os.getcwd()+'/UCR')
+    if X_train is None or y_train is None:
+        continue
+    
+    # uniq, counts = np.unique(y_train, return_counts=True)
+    # if np.any(counts < 2):
+    #     print(f"[{args.dataset}] WARNING: some classes <2 samples; doing a random (non-stratified) split")
+    #     stratify_arg = None
+    # else:
+    #     stratify_arg = y_train
+    # # train → train/val
+    # X_tr, X_val, y_tr, y_val = train_test_split(
+    #     X_train, y_train,
+    #     test_size=args.val_size,
+    #     random_state=args.seed,
+    #     stratify=stratify_arg
+    # )
+    
+    
+    
     X_val, Data['val_label'] = split_dataset(X_train, y_train, 0.5)
     Data['val_data'] = np.expand_dims(X_val, axis=1)
     max_seq_len = X_train.shape[1]
